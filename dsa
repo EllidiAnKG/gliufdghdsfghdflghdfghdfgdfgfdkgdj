@@ -1,0 +1,68 @@
+using System;
+
+interface IComparable
+{
+    int CompareTo(object obj);
+}
+
+class Person : IComparable
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+
+    public Person(string name, int age)
+    {
+        Name = name;
+        Age = age;
+    }
+    public int CompareTo(object obj)
+    {
+        if (obj == null) return 1;
+
+        Person otherPerson = obj as Person;
+        if (otherPerson != null)
+        {
+            return Age.CompareTo(otherPerson.Age);
+        }
+        else
+        {
+            throw new ArgumentException("ошибка аргумента ");
+        }
+    }
+}
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        Console.WriteLine("Введите имя первого человека:");
+        string name1 = Console.ReadLine();
+
+        Console.WriteLine("Введите возраст первого человека:");
+        int age1 = int.Parse(Console.ReadLine());
+
+        Console.WriteLine("Введите имя второго человека:");
+        string name2 = Console.ReadLine();
+
+        Console.WriteLine("Введите возраст второго человека:");
+        int age2 = int.Parse(Console.ReadLine());
+
+        Person person1 = new Person(name1, age1);
+        Person person2 = new Person(name2, age2);
+
+        int result = person1.CompareTo(person2);
+
+        if (result < 0)
+        {
+            Console.WriteLine($"{person1.Name} младше {person2.Name}");
+        }
+        else if (result > 0)
+        {
+            Console.WriteLine($"{person1.Name} старше {person2.Name}");
+        }
+        else
+        {
+            Console.WriteLine($"{person1.Name} и {person2.Name} одного возраста");
+        }
+    }
+}
