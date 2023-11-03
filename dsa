@@ -1,68 +1,31 @@
-using System;
+using System.Net.Sockets;
+using System.Text;
 
-interface IComparable
+using var topClient = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+try
 {
-    int CompareTo(object obj);
-}
+    await topClient.ConnectAsync("192.168.220.139", 1776);
+    while(true){
+        System.Console.WriteLine("Enter command for server: ");
+        string command = Console.ReadLine() + '\n';
 
-class Person : IComparable
-{
-    public string Name { get; set; }
-    public int Age { get; set; }
-
-    public Person(string name, int age)
-    {
-        Name = name;
-        Age = age;
-    }
-    public int CompareTo(object obj)
-    {
-        if (obj == null) return 1;
-
-        Person otherPerson = obj as Person;
-        if (otherPerson != null)
+        byte[] reqData = Encoding.UTF8.GetBytes(command);
+        await topClient.SendAsync(reqData, SocketFlags.None);
+        Console.WriteLine("Message has been send");
+   
+        if (command.Trim() == "-GetDate") 
         {
-            return Age.CompareTo(otherPerson.Age);
+            byte[] data = new byte[512];
+            int bytes = await topClient.ReceiveAsync(data, SocketFlags.None);
+
+            string time = Encoding.UTF8.GetString(data, 0, bytes);
+            Console.WriteLine($"Time: {time}");
         }
-        else
-        {
-            throw new ArgumentException("ошибка аргумента ");
         }
     }
-}
 
-class Program
+catch (Exception ex)
 {
-    static void Main(string[] args)
-    {
-        Console.WriteLine("Введите имя первого человека:");
-        string name1 = Console.ReadLine();
-
-        Console.WriteLine("Введите возраст первого человека:");
-        int age1 = int.Parse(Console.ReadLine());
-
-        Console.WriteLine("Введите имя второго человека:");
-        string name2 = Console.ReadLine();
-
-        Console.WriteLine("Введите возраст второго человека:");
-        int age2 = int.Parse(Console.ReadLine());
-
-        Person person1 = new Person(name1, age1);
-        Person person2 = new Person(name2, age2);
-
-        int result = person1.CompareTo(person2);
-
-        if (result < 0)
-        {
-            Console.WriteLine($"{person1.Name} младше {person2.Name}");
-        }
-        else if (result > 0)
-        {
-            Console.WriteLine($"{person1.Name} старше {person2.Name}");
-        }
-        else
-        {
-            Console.WriteLine($"{person1.Name} и {person2.Name} одного возраста");
-        }
-    }
+    Console.WriteLine(ex);
+    throw;
 }
